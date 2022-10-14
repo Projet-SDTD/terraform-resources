@@ -1,0 +1,12 @@
+[k3s-main-master]
+${main_master_ip} privateIP=${main_master_privateIP}
+
+[k3s-masters]
+%{for index, ip in masters_ips ~}
+${ip} privateIP=${masters_privateIPs[index]}
+%{endfor ~}
+
+[k3s-workers]
+%{for index, ip in workers_ips ~}
+${ip} privateIP=${workers_privateIPs[index]}
+%{endfor ~}

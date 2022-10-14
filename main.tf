@@ -38,40 +38,51 @@ resource "google_compute_firewall" "sdtd-firewall-internal" {
   name    = "sdtd-firewall-6443"
   network = google_compute_network.sdtd-network.name
 
-  source_ranges = ["10.128.0.0/9"]
+  source_tags = ["k3s"]
+  target_tags = ["k3s"]
 
   allow {
-    protocol = "tcp"
+    protocol = "all"
   }
 
 }
 
-resource "google_compute_instance" "sdtd-instance" {
-  count = var.num_instances
-  name         = "sdtd-instance-${count.index + 1}"
-  machine_type = "e2-medium"
-  metadata = {
-    ssh-keys = "${var.ssh_username}:${file(var.ssh_key_file)}"
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.sdtd-network.name
-    access_config {}
-  }
+resource "google_service_account" "k3s-server" {
+  account_id = "k3s-server"
 }
 
-output "public_ip" {
-  value = google_compute_instance.sdtd-instance.*.network_interface.0.access_config.0.nat_ip
+resource "google_service_account" "k3s-agent" {
+  account_id = "k3s-agent"
 }
 
-output "private_ip" {
-  value = google_compute_instance.sdtd-instance.*.network_interface.0.network_ip
+module "k3s-servers" {
+  source = "./k3s-masters"
+
+  project             = var.project
+  network             = google_compute_network.sdtd-network.self_link
+  region              = var.region
+  cidr_range          = var.servers.cidr_range
+  machine_type        = var.servers.machine_type
+  target_size         = var.servers.target_size
+  service_account     = google_service_account.k3s-server.email
+  ssh_username        = var.ssh_username
+  ssh_key_file        = var.ssh_key_file
+}
+
+/* # Let's first work on masters right ?
+module "k3s-agents" {
+  source   = "./k3s-agents"
+  for_each = var.agents
+
+  project         = var.project
+  network         = google_compute_network.k3s.self_link
+  region          = var.region
+  cidr_range      = var.workers.cidr_range
+  machine_type    = var.workers.machine_type
+  target_size     = var.workers.target_size
+  token           = module.k3s-servers.token
+  server_address  = module.k3s-servers.internal_lb_ip_address
+  service_account = google_service_account.k3s-agent.email
 }
 
 resource "local_file" "ansible_inventory" {
@@ -87,3 +98,4 @@ resource "local_file" "ansible_inventory" {
   )
   filename = "inventory"
 }
+*/

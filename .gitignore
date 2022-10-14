@@ -1,0 +1,4 @@
+*.json
+.terraform
+*.pub
+*.lock.hcl
