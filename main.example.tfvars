@@ -1,8 +1,8 @@
-project = "green-jet-364012"
-ssh_username = "leo"
+project = ""
+ssh_username = ""
 ssh_key_file = "terraform_key.pub"
 num_instances = 3
-authorized_networks = "82.66.131.243/32"
+authorized_networks = "<your public IP>/32"
 
 # Provide multiple master sites
 servers = {
