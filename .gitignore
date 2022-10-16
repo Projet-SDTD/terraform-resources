@@ -4,3 +4,4 @@
 *.lock.hcl
 *.tfstate
 *.tfstate.backup
+main.auto.tfvars
