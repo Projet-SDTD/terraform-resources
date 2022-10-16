@@ -15,6 +15,7 @@ variable "zone" {
 }
 
 variable "cidr_range" {
+  type = string
 }
 
 variable "machine_type" {
@@ -23,7 +24,7 @@ variable "machine_type" {
 
 variable "target_size" {
   type = number
-  default = 3
+  default = 2
 }
 
 variable "service_account" {

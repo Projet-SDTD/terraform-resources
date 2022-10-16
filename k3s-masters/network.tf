@@ -1,5 +1,6 @@
-resource "google_compute_subnetwork" "k3s-servers" {
-  name          = "k3s-servers"
+# Subnetwork in the VPC network for k3s masters
+resource "google_compute_subnetwork" "sdtd-k3s-masters" {
+  name          = "sdtd-k3s-masters"
   network       = var.network
   region        = var.region
   ip_cidr_range = var.cidr_range
@@ -7,61 +8,51 @@ resource "google_compute_subnetwork" "k3s-servers" {
   private_ip_google_access = true
 }
 
-resource "google_compute_address" "k3s-api-server-internal" {
-  name         = "k3s-api-server-internal"
+# Private IP address to loadbalance/failover requests from workers to master apis
+resource "google_compute_address" "sdtd-k3s-api-internal" {
+  name         = "sdtd-k3s-api-internal"
   address_type = "INTERNAL"
   purpose      = "GCE_ENDPOINT"
   region       = var.region
-  subnetwork   = google_compute_subnetwork.k3s-servers.id
+  subnetwork   = google_compute_subnetwork.sdtd-k3s-masters.id
 }
 
-resource "google_compute_address" "k3s-api-first-server-internal" {
-  name         = "k3s-api-first-server-internal"
-  address_type = "INTERNAL"
-  purpose      = "GCE_ENDPOINT"
-  region       = var.region
-  subnetwork   = google_compute_subnetwork.k3s-servers.id
-}
-
-resource "google_compute_address" "k3s-api-first-server-external" {
-  name = "k3s-api-first-server-external"
-}
-
-
-# Optional external address
-resource "google_compute_address" "k3s-api-server-external" {
-  name   = "k3s-api-server-external"
+# Public IP address to loadbalance/failover requests from external to master apis (for example kubectl)
+resource "google_compute_address" "sdtd-k3s-api-external" {
+  name   = "sdtd-k3s-api-external"
   region = var.region
 }
 
+# Private IP address for the first master (with --cloud-init option)
+resource "google_compute_address" "sdtd-k3s-initial-master-internal" {
+  name         = "sdtd-k3s-initial-api-internal"
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+  region       = var.region
+  subnetwork   = google_compute_subnetwork.sdtd-k3s-masters.id
+}
 
-/*# TODO : Adapt the rule to give access to the persons in the project
-resource "google_compute_firewall" "k3s-api-allow-hc" {
-  name          = "k3s-api-allow-hc"
-  network       = var.network
-  source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
-  allow {
-    protocol = "tcp"
-    ports    = [6443]
-  }
-  target_tags = ["k3s-server"]
-  direction   = "INGRESS"
-}*/
+# Public IP address for the first master (with --cloud-init option)
+resource "google_compute_address" "sdtd-k3s-initial-master-external" {
+  name = "sdtd-k3s-initial-master-external"
+}
 
-resource "google_compute_router" "router" {
-  name    = "k3s-servers"
+# Router to enable nating traffic of masters which haven't public IPs
+resource "google_compute_router" "sdtd-k3s-masters-router" {
+  name    = "sdtd-k3s-masters-router"
   region  = var.region
   network = var.network
 }
 
-resource "google_compute_router_nat" "nat" {
-  name                               = "k3s-servers"
-  router                             = google_compute_router.router.name
+# NAT on top of previously created router
+resource "google_compute_router_nat" "sdtd-k3s-masters-nat" {
+  name                               = "sdtd-k3s-masters-nat"
+  router                             = google_compute_router.sdtd-k3s-masters-router.name
   region                             = var.region
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
   subnetwork {
-    name                    = google_compute_subnetwork.k3s-servers.id
+    name                    = google_compute_subnetwork.sdtd-k3s-masters.self_link
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
 }

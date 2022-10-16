@@ -15,7 +15,7 @@ resource "google_compute_instance_template" "k3s-agent" {
   metadata_startup_script = data.template_file.k3s-agent-startup-script.rendered
 
   metadata = {
-    ssh-keys = "${var.ssh_username}:${file("${path.module}/${var.ssh_key_file}")}"
+    ssh-keys = "${var.ssh_username}:${file("${path.module}/../${var.ssh_key_file}")}"
   }
 
   disk {

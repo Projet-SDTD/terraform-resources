@@ -1,36 +1,40 @@
-resource "random_string" "token" {
+# K3S token (for nodes to authenticate to apiserver)
+resource "random_string" "sdtd-k3s-token" {
   length  = 32
   special = false
 }
 
-data "template_file" "k3s-first-master-startup-script" {
+# Template init script for initial master
+data "template_file" "sdtd-k3s-initial-master-startup-script" {
   template = file("${path.module}/templates/initial_master_init.sh")
   vars = {
-    token                  = random_string.token.result
-    internal_ip_address = google_compute_address.k3s-api-server-internal.address
-    external_ip_address = google_compute_address.k3s-api-first-server-external.address
-    external_lb_address = google_compute_address.k3s-api-server-external.address
+    token = random_string.sdtd-k3s-token.result
+    internal_ip_address = google_compute_address.sdtd-k3s-api-internal.address
+    external_ip_address = google_compute_address.sdtd-k3s-initial-master-external.address
+    external_lb_address = google_compute_address.sdtd-k3s-api-external.address
   }
 }
 
-data "template_file" "k3s-master-startup-script" {
+# Template init script for regular master
+data "template_file" "sdtd-k3s-master-startup-script" {
   template = file("${path.module}/templates/master_init.sh")
   vars = {
-    token                  = random_string.token.result
-    main_master_ip = google_compute_address.k3s-api-first-server-internal.address
+    token = random_string.sdtd-k3s-token.result
+    main_master_ip = google_compute_address.sdtd-k3s-initial-master-internal.address
   }
 }
 
-resource "google_compute_instance_template" "k3s-initial-master" {
-  name_prefix  = "k3s-initial-master-"
+# Initial master instance template
+resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
+  name_prefix  = "sdtd-k3s-initial-master-"
   machine_type = var.machine_type
 
   tags = ["k3s", "k3s-master"]
 
-  metadata_startup_script = data.template_file.k3s-first-master-startup-script.rendered
+  metadata_startup_script = data.template_file.sdtd-k3s-initial-master-startup-script.rendered
 
   metadata = {
-    ssh-keys = "${var.ssh_username}:${file("${path.module}/${var.ssh_key_file}")}"
+    ssh-keys = "${var.ssh_username}:${file("${path.module}/../${var.ssh_key_file}")}"
   }
 
   disk {
@@ -41,7 +45,7 @@ resource "google_compute_instance_template" "k3s-initial-master" {
 
   network_interface {
     network    = var.network
-    subnetwork = google_compute_subnetwork.k3s-servers.id
+    subnetwork = google_compute_subnetwork.sdtd-k3s-masters.id
     access_config {}
   }
 
@@ -61,31 +65,33 @@ resource "google_compute_instance_template" "k3s-initial-master" {
   }
 }
 
-resource "google_compute_instance_from_template" "k3s-init-master" {
-  name = "k3s-init-master"
+# Initial master instance
+resource "google_compute_instance_from_template" "sdtd-k3s-init-master" {
+  name = "sdtd-k3s-init-master"
   zone = var.zone
-  source_instance_template = google_compute_instance_template.k3s-initial-master.id
+  source_instance_template = google_compute_instance_template.sdtd-k3s-initial-master.id
   network_interface {
     network    = var.network
-    subnetwork = google_compute_subnetwork.k3s-servers.id
-    network_ip = google_compute_address.k3s-api-first-server-internal.address
+    subnetwork = google_compute_subnetwork.sdtd-k3s-masters.id
+    network_ip = google_compute_address.sdtd-k3s-initial-master-internal.address
     access_config {
-      nat_ip = google_compute_address.k3s-api-first-server-external.address
+      nat_ip = google_compute_address.sdtd-k3s-initial-master-external.address
     }
   }
   
 }
 
-resource "google_compute_instance_template" "k3s-master" {
-  name_prefix  = "k3s-master-"
+# Regular master instance template
+resource "google_compute_instance_template" "sdtd-k3s-master" {
+  name_prefix  = "sdtd-k3s-master-"
   machine_type = var.machine_type
 
   tags = ["k3s", "k3s-master"]
 
-  metadata_startup_script = data.template_file.k3s-master-startup-script.rendered
+  metadata_startup_script = data.template_file.sdtd-k3s-master-startup-script.rendered
 
   metadata = {
-    ssh-keys = "${var.ssh_username}:${file("${path.module}/${var.ssh_key_file}")}"
+    ssh-keys = "${var.ssh_username}:${file("${path.module}/../${var.ssh_key_file}")}"
   }
 
   disk {
@@ -96,7 +102,7 @@ resource "google_compute_instance_template" "k3s-master" {
 
   network_interface {
     network    = var.network
-    subnetwork = google_compute_subnetwork.k3s-servers.id
+    subnetwork = google_compute_subnetwork.sdtd-k3s-masters.id
   }
 
   shielded_instance_config {
@@ -115,14 +121,15 @@ resource "google_compute_instance_template" "k3s-master" {
   }
 }
 
-resource "google_compute_region_instance_group_manager" "k3s-masters" {
-  name = "k3s-servers"
+# Regular masters MIG (with autohealing)
+resource "google_compute_region_instance_group_manager" "sdtd-k3s-masters" {
+  name = "sdtd-k3s-masters"
 
-  base_instance_name = "k3s-server"
+  base_instance_name = "k3s-master"
   region             = var.region
 
   version {
-    instance_template = google_compute_instance_template.k3s-master.id
+    instance_template = google_compute_instance_template.sdtd-k3s-master.id
   }
 
   target_size = var.target_size
@@ -133,12 +140,12 @@ resource "google_compute_region_instance_group_manager" "k3s-masters" {
   }
 
   auto_healing_policies {
-    health_check      = google_compute_health_check.k3s-health-check-internal.id
+    health_check      = google_compute_health_check.sdtd-k3s-api-hc-internal.id
     initial_delay_sec = 240
   }
 
   depends_on = [
-    google_compute_instance_from_template.k3s-init-master,
-    google_compute_router_nat.nat
+    google_compute_instance_from_template.sdtd-k3s-init-master,
+    google_compute_router_nat.sdtd-k3s-masters-nat
   ]
 }
