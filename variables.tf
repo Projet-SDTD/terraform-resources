@@ -23,6 +23,10 @@ variable agents {
     type = map
 }
 
+variable "authorized_networks" {
+  type = string
+}
+
 variable "ssh_key_file" { }
 
 variable "ssh_username" { }

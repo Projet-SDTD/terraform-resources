@@ -2,3 +2,5 @@
 .terraform
 *.pub
 *.lock.hcl
+*.tfstate
+*.tfstate.backup

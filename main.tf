@@ -21,7 +21,8 @@ resource "google_compute_network" "sdtd-network" {
 
 resource "google_compute_firewall" "sdtd-external" {
   name    = "sdtd-firewall-icmp-ssh"
-  network = google_compute_network.sdtd-network.name
+  network = google_compute_network.sdtd-network.self_link
+  source_ranges = split(",", var.authorized_networks)
 
   allow {
     protocol = "icmp"
@@ -34,9 +35,21 @@ resource "google_compute_firewall" "sdtd-external" {
 
 }
 
+resource "google_compute_firewall" "sdtd-allow-hc" {
+  name          = "sdtd-allow-hc"
+  network       = google_compute_network.sdtd-network.self_link
+  source_ranges = ["130.211.0.0/22", "35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
+  allow {
+    protocol = "tcp"
+    ports    = ["6443"]
+  }
+  target_tags = ["k3s-master"]
+  direction   = "INGRESS"
+}
+
 resource "google_compute_firewall" "sdtd-firewall-internal" {
   name    = "sdtd-firewall-6443"
-  network = google_compute_network.sdtd-network.name
+  network = google_compute_network.sdtd-network.self_link
 
   source_tags = ["k3s"]
   target_tags = ["k3s"]
@@ -61,6 +74,7 @@ module "k3s-servers" {
   project             = var.project
   network             = google_compute_network.sdtd-network.self_link
   region              = var.region
+  zone                = var.zone
   cidr_range          = var.servers.cidr_range
   machine_type        = var.servers.machine_type
   target_size         = var.servers.target_size

@@ -1,9 +1,12 @@
 #! /bin/bash
 sudo apt update && sudo apt upgrade
 curl -sfL https://get.k3s.io | sh -s - server \
-    --server "https://${main_master_ip}:6443" \
+    --cluster-init \
     --write-kubeconfig-mode 644 \
     --token "${token}" \
+    --tls-san "${internal_ip_address}" \
+    --tls-san "${external_ip_address}" \
+    --node-taint "CriticalAddonsOnly=true:NoExecute" \
     --disable traefik \
     --with-node-id
 

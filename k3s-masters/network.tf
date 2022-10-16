@@ -15,12 +15,25 @@ resource "google_compute_address" "k3s-api-server-internal" {
   subnetwork   = google_compute_subnetwork.k3s-servers.id
 }
 
-/*# Optional external address
+resource "google_compute_address" "k3s-api-first-server-internal" {
+  name         = "k3s-api-first-server-internal"
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+  region       = var.region
+  subnetwork   = google_compute_subnetwork.k3s-servers.id
+}
+
+resource "google_compute_address" "k3s-api-first-server-external" {
+  name = "k3s-api-first-server-external"
+}
+
+
+# Optional external address
 resource "google_compute_address" "k3s-api-server-external" {
   name   = "k3s-api-server-external"
   region = var.region
 }
-*/
+
 
 /*# TODO : Adapt the rule to give access to the persons in the project
 resource "google_compute_firewall" "k3s-api-allow-hc" {
