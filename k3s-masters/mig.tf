@@ -125,7 +125,7 @@ resource "google_compute_instance_template" "sdtd-k3s-master" {
 resource "google_compute_region_instance_group_manager" "sdtd-k3s-masters" {
   name = "sdtd-k3s-masters"
 
-  base_instance_name = "k3s-master"
+  base_instance_name = "sdtd-k3s-master"
   region             = var.region
 
   version {
@@ -137,11 +137,6 @@ resource "google_compute_region_instance_group_manager" "sdtd-k3s-masters" {
   named_port {
     name = "k3s"
     port = 6443
-  }
-
-  auto_healing_policies {
-    health_check      = google_compute_health_check.sdtd-k3s-api-hc-internal.id
-    initial_delay_sec = 240
   }
 
   depends_on = [
