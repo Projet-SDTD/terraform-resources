@@ -54,7 +54,7 @@ resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
   }
 
   service_account {
-    email = var.service_account
+    email = var.sdtd-k3s-initial-master-service-account
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -65,7 +65,7 @@ resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
   }
 }
 
-# Initial master instance
+# Initial master instances
 resource "google_compute_instance_from_template" "sdtd-k3s-init-master" {
   name = "sdtd-k3s-init-master"
   zone = var.zone
@@ -110,7 +110,7 @@ resource "google_compute_instance_template" "sdtd-k3s-master" {
   }
 
   service_account {
-    email = var.service_account
+    email = var.sdtd-k3s-masters-service-account
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]

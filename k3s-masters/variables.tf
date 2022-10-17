@@ -27,7 +27,11 @@ variable "target_size" {
   default = 2
 }
 
-variable "service_account" {
+variable "sdtd-k3s-masters-service-account" {
+  type = string
+}
+
+variable "sdtd-k3s-initial-master-service-account" {
   type = string
 }
 

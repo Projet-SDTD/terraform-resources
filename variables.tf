@@ -11,7 +11,7 @@ variable "region" {
     default = "europe-west9"
 }
 
-variable "zone" {
+variable "initial-master-zone" {
     default = "europe-west9-a"
 }
 
