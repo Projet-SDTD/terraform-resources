@@ -12,6 +12,7 @@ data "template_file" "sdtd-k3s-initial-master-startup-script" {
     internal_ip_address = google_compute_address.sdtd-k3s-api-internal.address
     external_ip_address = google_compute_address.sdtd-k3s-initial-master-external.address
     external_lb_address = google_compute_address.sdtd-k3s-api-external.address
+    project_id = var.project
   }
 }
 
@@ -21,6 +22,7 @@ data "template_file" "sdtd-k3s-master-startup-script" {
   vars = {
     token = random_string.sdtd-k3s-token.result
     main_master_ip = google_compute_address.sdtd-k3s-initial-master-internal.address
+    project_id = var.project
   }
 }
 
@@ -28,6 +30,7 @@ data "template_file" "sdtd-k3s-master-startup-script" {
 resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
   name_prefix  = "sdtd-k3s-initial-master-"
   machine_type = var.machine_type
+  can_ip_forward = true
 
   tags = ["k3s", "k3s-master"]
 
@@ -85,6 +88,7 @@ resource "google_compute_instance_from_template" "sdtd-k3s-init-master" {
 resource "google_compute_instance_template" "sdtd-k3s-master" {
   name_prefix  = "sdtd-k3s-master-"
   machine_type = var.machine_type
+  can_ip_forward = true
 
   tags = ["k3s", "k3s-master"]
 
