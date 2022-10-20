@@ -86,6 +86,12 @@ resource "google_project_iam_member" "iam-sdtd-k3s-initial-master" {
   role = "roles/owner"
   member = "serviceAccount:${google_service_account.sdtd-k3s-initial-master.email}"
 }
+# Permissions to access the gcp for masters
+resource "google_project_iam_member" "iam-sdtd-k3s-masters" {
+  project = var.project
+  role = "roles/owner"
+  member = "serviceAccount:${google_service_account.sdtd-k3s-masters.email}"
+}
 
 # K3S masters creation
 module "sdtd-k3s-masters" {
