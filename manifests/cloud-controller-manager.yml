@@ -18,6 +18,16 @@ metadata:
     kubernetes.io/service-account.name: cloud-controller-manager
 type: kubernetes.io/service-account-token
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-controller-manager-config
+  namespace: kube-system
+data:
+  gce.conf: |
+    [globag]
+    multizone=true
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -59,6 +69,17 @@ spec:
         - --leader-elect=true
         - --allocate-node-cidrs=true
         - --cluster-cidr=10.42.0.0/16
+        - --cloud-config /gce-conf/gce.conf
+        volumeMounts:
+        - mountPath: /gce-conf
+          name: cfgmap-volume
+      volumes:
+        - name: cfgmap-volume
+          configMap:
+            name: cloud-controller-manager-config
+            items:
+              - key: gce.conf
+                path: gce.conf
       tolerations:
       # cela est nécessaire pour que CCM puisse s'initialiser
       - key: node.cloudprovider.kubernetes.io/uninitialized
