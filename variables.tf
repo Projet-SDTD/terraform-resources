@@ -19,7 +19,7 @@ variable servers {
     type = map
 }
 
-variable agents {
+variable workers {
     type = map
 }
 

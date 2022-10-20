@@ -1,18 +1,18 @@
-data "template_file" "k3s-agent-startup-script" {
-  template = file("${path.module}/templates/agent.sh")
+data "template_file" "k3s-worker-startup-script" {
+  template = file("${path.module}/templates/worker_init.sh")
   vars = {
     token          = var.token
-    server_address = var.server_address
+    server_address = var.master_address
   }
 }
 
-resource "google_compute_instance_template" "k3s-agent" {
-  name_prefix  = "k3s-worker-${var.name}"
+resource "google_compute_instance_template" "sdtd-k3s-worker" {
+  name_prefix  = "sdtd-k3s-worker-"
   machine_type = var.machine_type
 
-  tags = ["k3s", "k3s-agent"]
+  tags = ["k3s", "k3s-worker"]
 
-  metadata_startup_script = data.template_file.k3s-agent-startup-script.rendered
+  metadata_startup_script = data.template_file.k3s-worker-startup-script.rendered
 
   metadata = {
     ssh-keys = "${var.ssh_username}:${file("${path.module}/../${var.ssh_key_file}")}"
@@ -26,8 +26,7 @@ resource "google_compute_instance_template" "k3s-agent" {
 
   network_interface {
     network    = var.network
-    subnetwork = google_compute_subnetwork.k3s-agents.self_link
-    access_config {}
+    subnetwork = google_compute_subnetwork.sdtd-k3s-workers.self_link
   }
 
   shielded_instance_config {
@@ -35,7 +34,7 @@ resource "google_compute_instance_template" "k3s-agent" {
   }
 
   service_account {
-    email = var.service_account
+    email = var.service_account_networkers
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -46,14 +45,13 @@ resource "google_compute_instance_template" "k3s-agent" {
   }
 }
 
-resource "google_compute_region_instance_group_manager" "k3s-agents" {
-  name = "k3s-agents-${var.name}"
-
-  base_instance_name = "k3s-agent-${var.name}"
+resource "google_compute_region_instance_group_manager" "sdtd-k3s-workers" {
+  name               = "sdtd-k3s-worker"
+  base_instance_name = "sdtd-k3s-worker"
   region             = var.region
 
   version {
-    instance_template = google_compute_instance_template.k3s-agent.id
+    instance_template = google_compute_instance_template.sdtd-k3s-worker.id
   }
 
   target_size = var.target_size
@@ -75,5 +73,5 @@ resource "google_compute_region_instance_group_manager" "k3s-agents" {
     max_surge_fixed              = 3
   }
 
-  depends_on = [google_compute_router_nat.nat]
+  depends_on = [google_compute_router_nat.sdtd-k3s-workers-nat]
 }

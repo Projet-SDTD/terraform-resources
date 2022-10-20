@@ -47,7 +47,7 @@ resource "google_compute_firewall" "sdtd-allow-hc" {
     protocol = "tcp"
     ports = ["6443"]
   }
-  target_tags = ["k3s-master"]
+  target_tags = ["k3s-worker"]
   direction = "INGRESS"
 }
 
@@ -104,22 +104,25 @@ module "sdtd-k3s-masters" {
   ssh_key_file = var.ssh_key_file
 }
 
-/* # Let's first work on masters right ?
-module "k3s-agents" {
-  source   = "./k3s-agents"
-  for_each = var.agents
+# K3S workers creation
+module "sdtd-k3s-workers" {
+  source = "./k3s-workers"
 
-  project         = var.project
-  network         = google_compute_network.k3s.self_link
-  region          = var.region
-  cidr_range      = var.workers.cidr_range
-  machine_type    = var.workers.machine_type
-  target_size     = var.workers.target_size
-  token           = module.k3s-servers.token
-  server_address  = module.k3s-servers.internal_lb_ip_address
-  service_account = google_service_account.k3s-agent.email
+  project = var.project
+  network = google_compute_network.sdtd-network.self_link
+  token = module.sdtd-k3s-masters.token
+  region = var.region
+  cidr_range = var.workers.cidr_range
+  machine_type = var.servers.machine_type
+  master_address = module.sdtd-k3s-masters.internal_lb_ip_address
+  service_account_networkers = google_service_account.sdtd-k3s-workers.email
+  target_size = var.servers.target_size
+  sdtd-k3s-workers-service-account = google_service_account.sdtd-k3s-workers.email
+  ssh_username = var.ssh_username
+  ssh_key_file = var.ssh_key_file
 }
 
+/*
 resource "local_file" "ansible_inventory" {
   content = templatefile("inventory.tmpl",
     {
