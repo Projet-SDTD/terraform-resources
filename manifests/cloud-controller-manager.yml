@@ -25,8 +25,8 @@ metadata:
   namespace: kube-system
 data:
   gce.conf: |
-    [globag]
-    multizone=true
+    [global]
+    multizone=on
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -60,16 +60,14 @@ spec:
       serviceAccountName: cloud-controller-manager
       containers:
       - name: cloud-controller-manager
-        # pour les fournisseurs in-tree, nous utilisons k8s.gcr.io/cloud-controller-manager
-        # cela peut être remplacé par n'importe quelle autre image pour les fournisseurs out-of-tree
         image: leo36747/cloud-controller-manager:latest
         command:
         - /cloud-controller-manager
-        - --cloud-provider=gce  # Ajoutez votre propre fournisseur de cloud ici!
+        - --cloud-provider=gce
         - --leader-elect=true
         - --allocate-node-cidrs=true
         - --cluster-cidr=10.42.0.0/16
-        - --cloud-config /gce-conf/gce.conf
+        - --cloud-config=/gce-conf/gce.conf
         volumeMounts:
         - mountPath: /gce-conf
           name: cfgmap-volume
@@ -81,17 +79,18 @@ spec:
               - key: gce.conf
                 path: gce.conf
       tolerations:
-      # cela est nécessaire pour que CCM puisse s'initialiser
       - key: node.cloudprovider.kubernetes.io/uninitialized
         value: "true"
         effect: NoSchedule
       - key: CriticalAddonsOnly
         value: "true"
         effect: NoExecute
-      # le daemonset doit pouvoir être exécuté sur les nœuds master. Le marquage peut varier en fonction de la configuration de votre cluster.
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
       - key: node.kubernetes.io/network-unavailable
         effect: NoSchedule
       # ceci limite le fonctionnement du CCM sur des nœuds master
       # le sélecteur de nœud peut varier en fonction de la configuration de votre cluster
+      # TODO add nodeSelector
+      nodeSelector:
+        node-role.kubernetes.io/master: "true"
