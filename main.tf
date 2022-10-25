@@ -97,6 +97,7 @@ resource "google_project_iam_member" "iam-sdtd-k3s-masters" {
 module "sdtd-k3s-masters" {
   source = "./k3s-masters"
 
+  project = var.project
   network = google_compute_network.sdtd-network.self_link
   region = var.region
   zone = var.initial-master-zone
