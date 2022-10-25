@@ -34,7 +34,7 @@ resource "google_compute_instance_template" "sdtd-k3s-worker" {
   }
 
   service_account {
-    email = var.service_account_networkers
+    email = var.sdtd-k3s-workers-service-account
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]
@@ -46,7 +46,7 @@ resource "google_compute_instance_template" "sdtd-k3s-worker" {
 }
 
 resource "google_compute_region_instance_group_manager" "sdtd-k3s-workers" {
-  name               = "sdtd-k3s-worker"
+  name               = "sdtd-k3s-workers"
   base_instance_name = "sdtd-k3s-worker"
   region             = var.region
 

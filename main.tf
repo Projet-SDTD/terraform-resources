@@ -91,7 +91,6 @@ resource "google_project_iam_member" "iam-sdtd-k3s-initial-master" {
 module "sdtd-k3s-masters" {
   source = "./k3s-masters"
 
-  project = var.project
   network = google_compute_network.sdtd-network.self_link
   region = var.region
   zone = var.initial-master-zone
@@ -108,14 +107,12 @@ module "sdtd-k3s-masters" {
 module "sdtd-k3s-workers" {
   source = "./k3s-workers"
 
-  project = var.project
   network = google_compute_network.sdtd-network.self_link
   token = module.sdtd-k3s-masters.token
   region = var.region
   cidr_range = var.workers.cidr_range
   machine_type = var.servers.machine_type
   master_address = module.sdtd-k3s-masters.internal_lb_ip_address
-  service_account_networkers = google_service_account.sdtd-k3s-workers.email
   target_size = var.servers.target_size
   sdtd-k3s-workers-service-account = google_service_account.sdtd-k3s-workers.email
   ssh_username = var.ssh_username

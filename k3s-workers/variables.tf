@@ -1,7 +1,3 @@
-variable "project" {
-  type = string
-}
-
 variable "network" {
   type = string
 }
@@ -27,10 +23,6 @@ variable "token" {
 }
 
 variable "master_address" {
-  type = string
-}
-
-variable "service_account_networkers" {
   type = string
 }
 
