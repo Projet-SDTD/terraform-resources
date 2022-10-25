@@ -3,6 +3,7 @@ data "template_file" "k3s-worker-startup-script" {
   vars = {
     token          = var.token
     server_address = var.master_address
+    project_id = var.project
   }
 }
 

@@ -92,6 +92,12 @@ resource "google_project_iam_member" "iam-sdtd-k3s-masters" {
   role = "roles/owner"
   member = "serviceAccount:${google_service_account.sdtd-k3s-masters.email}"
 }
+# Permissions to access the gcp for workers
+resource "google_project_iam_member" "iam-sdtd-k3s-workers" {
+  project = var.project
+  role = "roles/owner"
+  member = "serviceAccount:${google_service_account.sdtd-k3s-workers.email}"
+}
 
 # K3S masters creation
 module "sdtd-k3s-masters" {
@@ -114,13 +120,14 @@ module "sdtd-k3s-masters" {
 module "sdtd-k3s-workers" {
   source = "./k3s-workers"
 
+  project = var.project
   network = google_compute_network.sdtd-network.self_link
   token = module.sdtd-k3s-masters.token
   region = var.region
   cidr_range = var.workers.cidr_range
   machine_type = var.servers.machine_type
   master_address = module.sdtd-k3s-masters.internal_lb_ip_address
-  target_size = var.servers.target_size
+  target_size = var.workers.target_size
   sdtd-k3s-workers-service-account = google_service_account.sdtd-k3s-workers.email
   ssh_username = var.ssh_username
   ssh_key_file = var.ssh_key_file

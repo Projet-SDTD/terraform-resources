@@ -12,7 +12,7 @@ servers = {
 }
 
 # TODO : Provide multiple agent sites
-agents = {
+workers = {
     cidr_range    = "192.168.1.0/24"
     machine_type  = "e2-micro"
     target_size   = 2
