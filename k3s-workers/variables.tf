@@ -1,11 +1,3 @@
-variable "project" {
-  type = string
-}
-
-variable "name" {
-  type = string
-}
-
 variable "network" {
   type = string
 }
@@ -27,10 +19,21 @@ variable "target_size" {
 }
 
 variable "token" {
+  type = string
 }
 
-variable "server_address" {
+variable "master_address" {
+  type = string
 }
 
-variable "service_account" {
+variable "sdtd-k3s-workers-service-account" {
+  type = string
+}
+
+variable "ssh_username" {
+  type = string
+}
+
+variable "ssh_key_file" {
+  type = string
 }
