@@ -12,7 +12,8 @@ curl -sfL https://get.k3s.io | sh -s - server \
     --node-taint "CriticalAddonsOnly=true:NoExecute" \
     --disable traefik \
     --disable-cloud-controller \
-    --no-deploy servicelb \
-    --no-deploy metrics-server \
+    --disable servicelb \
+    --disable metrics-server \
+    --disable coredns \
     --kubelet-arg cloud-provider=external \
     --kubelet-arg provider-id=gce://${project_id}/$ZONE/$HOSTNAME

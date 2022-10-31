@@ -19,9 +19,7 @@ variable servers {
     type = map
 }
 
-variable workers {
-    type = map
-}
+variable workers { }
 
 variable "authorized_networks" {
   type = string

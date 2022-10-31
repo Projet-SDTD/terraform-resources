@@ -10,6 +10,10 @@ variable "region" {
   type = string
 }
 
+variable "zones" {
+  type = list(string)
+}
+
 variable "cidr_range" {
 }
 

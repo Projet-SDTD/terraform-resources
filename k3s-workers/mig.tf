@@ -10,6 +10,7 @@ data "template_file" "k3s-worker-startup-script" {
 resource "google_compute_instance_template" "sdtd-k3s-worker" {
   name_prefix  = "sdtd-k3s-worker-"
   machine_type = var.machine_type
+  can_ip_forward = true
 
   tags = ["k3s", "k3s-worker"]
 
@@ -46,10 +47,11 @@ resource "google_compute_instance_template" "sdtd-k3s-worker" {
   }
 }
 
-resource "google_compute_region_instance_group_manager" "sdtd-k3s-workers" {
-  name               = "sdtd-k3s-workers"
-  base_instance_name = "sdtd-k3s-worker"
-  region             = var.region
+resource "google_compute_instance_group_manager" "sdtd-k3s-workers" {
+  count = length(var.zones)
+  name               = "sdtd-k3s-workers-${var.zones[count.index]}"
+  base_instance_name = "sdtd-k3s-worker-${var.zones[count.index]}"
+  zone = var.zones[count.index]
 
   version {
     instance_template = google_compute_instance_template.sdtd-k3s-worker.id
@@ -69,7 +71,6 @@ resource "google_compute_region_instance_group_manager" "sdtd-k3s-workers" {
 
   update_policy {
     type                         = "PROACTIVE"
-    instance_redistribution_type = "PROACTIVE"
     minimal_action               = "REPLACE"
     max_surge_fixed              = 3
   }
