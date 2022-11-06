@@ -1,0 +1,59 @@
+# Retrieve kubeconfig
+- name: Copy, modify and retrieve kubeconfig for external access
+  hosts: k3s-main-master
+  become: true
+  tasks:
+    - ansible.builtin.copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /tmp/kubeconfig
+        remote_src: yes
+    - ansible.builtin.replace:
+        path: /tmp/kubeconfig
+        regexp: '127.0.0.1'
+        replace: "{{ hostvars[groups['k3s-masters'][0]]['inventory_hostname'] }}"
+    - ansible.builtin.fetch:
+        src: /tmp/kubeconfig
+        dest: ./fetched/kubeconfig
+        flat: yes
+    - ansible.builtin.file:
+        path: /tmp/kubeconfig
+        state: absent
+# Install python3-pip
+- name: install pre-requisites apt
+  hosts: k3s-main-master
+  become: true
+  tasks:
+    - ansible.builtin.apt:
+        name: python3-pip
+        state: present
+# Install python packages for kubernetes
+- name: install pre-requisites pip
+  hosts: k3s-main-master
+  tasks:
+    - pip:
+        name:
+          - pyyaml
+          - kubernetes
+# Deploy the current basic manifests
+- name: Deploy basic manifests
+  hosts: k3s-main-master
+  tasks:
+    - copy:
+        src: ../manifests/
+        dest: ~/
+    - kubernetes.core.k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: ~/coredns.yaml
+    - kubernetes.core.k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: ~/cloud-controller-manager.yaml
+    - kubernetes.core.k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: ~/metrics-server-components.yaml
+    - kubernetes.core.k8s:
+        state: present
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        src: ~/cluster-autoscaler.yaml

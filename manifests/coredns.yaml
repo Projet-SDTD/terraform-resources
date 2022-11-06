@@ -108,16 +108,12 @@ spec:
         - key: "node-role.kubernetes.io/master"
           operator: "Exists"
           effect: "NoSchedule"
-      tolerations:
       # cela est nécessaire pour que CCM puisse s'initialiser
-      - key: node.cloudprovider.kubernetes.io/uninitialized
-        value: "true"
-        effect: NoSchedule
-      # le daemonset doit pouvoir être exécuté sur les nœuds master. Le marquage peut varier en fonction de la configuration de votre cluster.
-      - key: node-role.kubernetes.io/master
-        effect: NoSchedule
-      - key: node.kubernetes.io/network-unavailable
-        effect: NoSchedule
+        - key: node.cloudprovider.kubernetes.io/uninitialized
+          value: "true"
+          effect: NoSchedule
+        - key: node.kubernetes.io/network-unavailable
+          effect: NoSchedule
       nodeSelector:
         beta.kubernetes.io/os: linux
       topologySpreadConstraints:
@@ -129,9 +125,6 @@ spec:
               k8s-app: kube-dns
       nodeSelector:
         node-role.kubernetes.io/master: "true"
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        effect: NoSchedule
       containers:
       - name: coredns
         image: rancher/mirrored-coredns-coredns:1.9.1

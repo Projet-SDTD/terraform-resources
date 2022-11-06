@@ -9,6 +9,7 @@ curl -sfL https://get.k3s.io | sh -s - server \
     --token "${token}" \
     --tls-san "${internal_ip_address}" \
     --tls-san "${external_ip_address}" \
+    --tls-san "${external_lb_address}" \
     --node-taint "CriticalAddonsOnly=true:NoExecute" \
     --disable traefik \
     --disable-cloud-controller \

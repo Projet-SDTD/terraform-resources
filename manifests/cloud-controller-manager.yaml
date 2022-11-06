@@ -91,6 +91,5 @@ spec:
         effect: NoSchedule
       # ceci limite le fonctionnement du CCM sur des nœuds master
       # le sélecteur de nœud peut varier en fonction de la configuration de votre cluster
-      # TODO add nodeSelector
       nodeSelector:
         node-role.kubernetes.io/master: "true"

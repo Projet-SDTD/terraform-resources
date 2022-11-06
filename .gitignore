@@ -6,3 +6,5 @@
 *.tfstate.backup
 main.auto.tfvars
 *.lock.info
+playbooks/fetched
+inventory

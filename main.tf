@@ -134,18 +134,14 @@ module "sdtd-k3s-workers" {
   ssh_key_file = var.ssh_key_file
 }
 
-/*
 resource "local_file" "ansible_inventory" {
-  content = templatefile("inventory.tmpl",
+  content = templatefile("templates/inventory.tmpl",
     {
-     main_master_ip = google_compute_instance.sdtd-instance.0.network_interface.0.access_config.0.nat_ip,
-     main_master_privateIP = google_compute_instance.sdtd-instance.0.network_interface.0.network_ip,
-     masters_ips = slice(google_compute_instance.sdtd-instance, 1, length(google_compute_instance.sdtd-instance)).*.network_interface.0.access_config.0.nat_ip,
-     masters_privateIPs = slice(google_compute_instance.sdtd-instance, 1, length(google_compute_instance.sdtd-instance)).*.network_interface.0.network_ip,
-     workers_ips = [],
-     workers_privateIPs = [],
+     main_master_ip = module.sdtd-k3s-masters.main_master_ip,
+     ssh_user = var.ssh_username,
+     main_master_privateIP = module.sdtd-k3s-masters.main_master_privateIP,
+     masters_lb_ip = module.sdtd-k3s-masters.external_lb_ip_address,
     }
   )
   filename = "inventory"
 }
-*/
