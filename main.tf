@@ -47,7 +47,7 @@ resource "google_compute_firewall" "sdtd-allow-hc" {
     protocol = "tcp"
     ports = ["6443"]
   }
-  target_tags = ["k3s-worker"]
+  target_tags = ["k3s"]
   direction = "INGRESS"
 }
 
@@ -123,6 +123,7 @@ module "sdtd-k3s-workers" {
   project = var.project
   network = google_compute_network.sdtd-network.self_link
   token = module.sdtd-k3s-masters.token
+  zones = var.workers.zones
   region = var.region
   cidr_range = var.workers.cidr_range
   machine_type = var.servers.machine_type

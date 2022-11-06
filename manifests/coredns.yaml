@@ -61,11 +61,11 @@ data:
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
         }
-        hosts /etc/coredns/NodeHosts {
-          ttl 60
-          reload 15s
-          fallthrough
-        }
+        #hosts /etc/coredns/NodeHosts {
+        #  ttl 60
+        #  reload 15s
+        #  fallthrough
+        #}
         prometheus :9153
         forward . /etc/resolv.conf
         cache 30
@@ -73,7 +73,7 @@ data:
         reload
         loadbalance
     }
-    import /etc/coredns/custom/*.server
+    #import /etc/coredns/custom/*.server
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -127,6 +127,11 @@ spec:
           labelSelector:
             matchLabels:
               k8s-app: kube-dns
+      nodeSelector:
+        node-role.kubernetes.io/master: "true"
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       containers:
       - name: coredns
         image: rancher/mirrored-coredns-coredns:1.9.1
@@ -191,8 +196,8 @@ spec:
             items:
             - key: Corefile
               path: Corefile
-            - key: NodeHosts
-              path: NodeHosts
+#            - key: NodeHosts
+#              path: NodeHosts
         - name: custom-config-volume
           configMap:
             name: coredns-custom
