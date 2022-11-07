@@ -16,4 +16,5 @@ workers = {
     cidr_range    = "192.168.1.0/24"
     machine_type  = "e2-micro"
     target_size   = 2
+    zones = ["europe-west9-a", "europe-west9-b", "europe-west9-c"]
   }
