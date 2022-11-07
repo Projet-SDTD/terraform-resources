@@ -28,5 +28,3 @@ variable "authorized_networks" {
 variable "ssh_key_file" { }
 
 variable "ssh_username" { }
-
-variable num_instances { }
