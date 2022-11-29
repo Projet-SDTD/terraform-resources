@@ -1,4 +1,5 @@
 #! /bin/bash
+apt install -y open-iscsi util-linux nfs-common jq
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 ZONE=$(gcloud compute instances list --filter="name=$${HOSTNAME}" --format "get(zone)" | awk -F/ '{print $NF}')
 gcloud compute instances add-tags $HOSTNAME --tags=$HOSTNAME --zone=$ZONE

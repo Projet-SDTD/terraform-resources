@@ -1,4 +1,5 @@
 #! /bin/bash
+apt install -y open-iscsi util-linux nfs-common jq
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 RDM_STR=$(cat /dev/random | tr -dc '[:alpha:]' | fold -w $${1:-15} | head -n 1)
 ZONE=$(gcloud compute instances list --filter="name=$${HOSTNAME}" --format "get(zone)" | awk -F/ '{print $NF}')
