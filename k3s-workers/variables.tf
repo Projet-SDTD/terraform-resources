@@ -38,6 +38,9 @@ variable "sdtd-k3s-workers-service-account" {
   type = string
 }
 
+variable "sdtd-k3s-workers-disk-size" {
+}
+
 variable "ssh_username" {
   type = string
 }

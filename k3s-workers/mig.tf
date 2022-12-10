@@ -24,6 +24,7 @@ resource "google_compute_instance_template" "sdtd-k3s-worker" {
     source_image = "debian-cloud/debian-10"
     auto_delete  = true
     boot         = true
+    disk_size_gb = var.sdtd-k3s-workers-disk-size
   }
 
   network_interface {

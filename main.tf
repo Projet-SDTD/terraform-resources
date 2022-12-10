@@ -126,12 +126,13 @@ module "sdtd-k3s-workers" {
   zones = var.workers.zones
   region = var.region
   cidr_range = var.workers.cidr_range
-  machine_type = var.servers.machine_type
+  machine_type = var.workers.machine_type
   master_address = module.sdtd-k3s-masters.internal_lb_ip_address
   target_size = var.workers.target_size
   sdtd-k3s-workers-service-account = google_service_account.sdtd-k3s-workers.email
   ssh_username = var.ssh_username
   ssh_key_file = var.ssh_key_file
+  sdtd-k3s-workers-disk-size = var.sdtd-k3s-workers-disk-size
 }
 
 resource "local_file" "ansible_inventory" {

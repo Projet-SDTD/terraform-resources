@@ -25,6 +25,8 @@ variable "authorized_networks" {
   type = string
 }
 
+variable "sdtd-k3s-workers-disk-size" {}
+
 variable "ssh_key_file" { }
 
 variable "ssh_username" { }

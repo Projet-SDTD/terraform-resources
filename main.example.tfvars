@@ -15,3 +15,5 @@ workers = {
     machine_type  = "e2-small"
     target_size   = 1
   }
+
+sdtd-k3s-workers-disk-size = 50
