@@ -44,6 +44,7 @@ resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
     source_image = "debian-cloud/debian-10"
     auto_delete  = true
     boot         = true
+    disk_size_gb = 50
   }
 
   network_interface {
@@ -102,6 +103,7 @@ resource "google_compute_instance_template" "sdtd-k3s-master" {
     source_image = "debian-cloud/debian-10"
     auto_delete  = true
     boot         = true
+    disk_size_gb = 50
   }
 
   network_interface {
