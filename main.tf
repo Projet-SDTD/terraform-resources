@@ -133,6 +133,7 @@ module "sdtd-k3s-workers" {
   ssh_username = var.ssh_username
   ssh_key_file = var.ssh_key_file
   sdtd-k3s-workers-disk-size = var.sdtd-k3s-workers-disk-size
+  depends_on = [module.sdtd-k3s-masters]
 }
 
 resource "local_file" "ansible_inventory" {
