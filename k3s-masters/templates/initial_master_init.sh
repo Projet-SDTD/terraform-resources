@@ -7,6 +7,7 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.7+k3s1 sh -s - server \
     --docker \
     --cluster-init \
     --write-kubeconfig-mode 644 \
+    --node-label "master=true" \
     --token "${token}" \
     --tls-san "${internal_ip_address}" \
     --tls-san "${external_ip_address}" \

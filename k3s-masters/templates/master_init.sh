@@ -6,6 +6,7 @@ gcloud compute instances add-tags $HOSTNAME --tags=$HOSTNAME --zone=$ZONE
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION=v1.24.7+k3s1 sh -s - server \
     --docker \
     --server "https://${main_master_ip}:6443" \
+    --node-label "master=true" \
     --write-kubeconfig-mode 644 \
     --token "${token}" \
     --disable traefik \
