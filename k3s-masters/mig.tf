@@ -41,7 +41,7 @@ resource "google_compute_instance_template" "sdtd-k3s-initial-master" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-11"
     auto_delete  = true
     boot         = true
     disk_size_gb = 50
@@ -100,10 +100,11 @@ resource "google_compute_instance_template" "sdtd-k3s-master" {
   }
 
   disk {
-    source_image = "debian-cloud/debian-10"
+    source_image = "debian-cloud/debian-11"
     auto_delete  = true
     boot         = true
     disk_size_gb = 50
+    device_name = "stateful-disk"
   }
 
   network_interface {
@@ -143,6 +144,24 @@ resource "google_compute_region_instance_group_manager" "sdtd-k3s-masters" {
   named_port {
     name = "k3s"
     port = 6443
+  }
+
+  stateful_disk {
+    device_name = "stateful-disk"
+    delete_rule = "ON_PERMANENT_INSTANCE_DELETION"
+  }
+
+  update_policy {
+    type                           = "PROACTIVE"
+    minimal_action                 = "REPLACE"
+    instance_redistribution_type   = "NONE"
+    max_unavailable_fixed          = 3
+    replacement_method             = "RECREATE"
+  }
+
+  auto_healing_policies {
+    health_check          = google_compute_health_check.sdtd-k3s-api-hc-internal.id
+    initial_delay_sec     = 600
   }
 
   depends_on = [
