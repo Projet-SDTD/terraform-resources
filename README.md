@@ -2,8 +2,6 @@
 
 This repo contains all the terraform files needed to deploy the SDTD infrastructure in GCP.
 
-TODO : Better documentation/graphs for usage
-
 # How to use
 
 ## Prerequisites
